@@ -67,11 +67,11 @@
 typedef uint32 Dio_ChannelType; /*  Numeric ID of a DIO channel */
 typedef uint8  Dio_PortType   ; /*  Numeric ID of a DIO port    */
 typedef uint8  Dio_LevelType  ; /*  DIO channel level           */
+typedef uint8  Dio_PinType    ; /*  Numeric ID of a DIO pin     */
 
 /* the type for the value of a DIO port 
    Dio_PortLevelType inherits the size of the largest port.*/
-typedef uint8  Dio_PortLevelType; 
-
+typedef uint32  Dio_PortLevelType; 
 
 /* These are the possible levels a DIO channel can have (input or output) */
 #define STD_LOW    (Dio_LevelType)0x00
@@ -81,10 +81,41 @@ typedef uint8  Dio_PortLevelType;
 channels within a port. */
 typedef struct 
 {
-	uint32         mask;      /* This element mask which defines the positions of the channel group. */
+	uint32          mask;      /* This element mask which defines the positions of the channel group. */
 	uint8          offset;    /* This element shall be the position of the Channel Group on the port, counted from the LSB. */
 	Dio_PortType   port;      /* This shall be the port on which the Channel group is defined */
 }Dio_ChannelGroupType;
+
+typedef struct 
+{
+	uint32         pin;
+	Dio_PortType   port;        
+}Dio_ChannelCfg;
+
+#define PIN0   ((Dio_PinType)0)      
+#define PIN1   ((Dio_PinType)1)
+#define PIN2   ((Dio_PinType)2)
+#define PIN3   ((Dio_PinType)3)
+#define PIN4   ((Dio_PinType)4)
+#define PIN5   ((Dio_PinType)5)
+#define PIN6   ((Dio_PinType)6)
+#define PIN7   ((Dio_PinType)7)
+#define PIN8   ((Dio_PinType)8)
+#define PIN9   ((Dio_PinType)9)
+#define PIN10  ((Dio_PinType)10)
+#define PIN11  ((Dio_PinType)11)
+#define PIN12  ((Dio_PinType)12)
+#define PIN13  ((Dio_PinType)13)
+#define PIN14  ((Dio_PinType)14)
+#define PIN15  ((Dio_PinType)15)
+
+#define PORTA  ((Dio_PortType)0)
+#define PORTB  ((Dio_PortType)1)
+#define PORTC  ((Dio_PortType)2)
+#define PORTD  ((Dio_PortType)3)
+#define PORTE  ((Dio_PortType)4)
+#define PORTF  ((Dio_PortType)5)
+#define PORTG  ((Dio_PortType)6)
 
 /************************************************  Function definitions *******************************************************/ 
 /* Description: Returns the value of the specified DIO channel. */
@@ -105,14 +136,19 @@ Dio_PortLevelType Dio_ReadChannelGroup (const Dio_ChannelGroupType* ChannelGroup
 /* Description: Service to set a subset of the adjoining bits of a port to a specified level. */
 void Dio_WriteChannelGroup (const Dio_ChannelGroupType* ChannelGroupIdPtr, Dio_PortLevelType Level);
 
+#if DioVersionInfoApi == true
 /* Description: Service to get the version information of this module. */
 void Dio_GetVersionInfo (Std_VersionInfoType* VersionInfo);
+#endif 
 
+#if DioFlipChannelApi == true
 /* Description: Service to flip (change from 1 to 0 or from 0 to 1) the level of a channel and return the level of the channel after flip. */
 Dio_LevelType Dio_FlipChannel (Dio_ChannelType ChannelId);
+#endif
 
+#if DioMaskedWritePortApi == true 
 /* Description: Service to set the value of a given port with required mask. */
 void Dio_MaskedWritePort (Dio_PortType PortId, Dio_PortLevelType Level, Dio_PortLevelType Mask);
-
+#endif
 
 #endif  /* DIO_H */
