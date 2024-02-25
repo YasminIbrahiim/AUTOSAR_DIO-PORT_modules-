@@ -1,9 +1,12 @@
-/**********************************************************************************************************/
-/************ STM32f103xx Port_Driver                                **************************************/ 
-/************ File Name  : Port.c                                    **************************************/ 
-/************ Author     : Yasmeen Ibrahim                           **************************************/           
-/************ Description:                                           **************************************/
-/**********************************************************************************************************/
+/*******************************************************************************************************/
+/************ STM32f103xx Port_Driver                                ***********************************/ 
+/************ File Name  : Port.c                                    ***********************************/ 
+/************ Author     : Yasmeen Ibrahim                           ***********************************/           
+/************ Description:                                           ***********************************/
+/*******************************************************************************************************/
+#include "Port.h"
+#include "Port_Regs.h"
+
 
 /*
 @Service Name       : Port_Init
@@ -17,7 +20,130 @@
 @Description        : Initializes the Port Driver module      */
 void Port_Init (const Port_ConfigType* ConfigPtr)
 {
-	
+	uint32  PortTypeLOC = ConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID ;
+	uint32  PinTypeLOC  = ConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PIN_MASK_ID  ;
+	for(uint8 u8Counter = 0 ;u8Counter < PortNumberOfPortPins ; u8Counter++ )
+	{
+		switch(PortTypeLOC)
+		{
+			case PORTA:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{
+				/* In input mode CNFy:
+				    00: Analog mode
+				    01: Floating input (reset state)
+				    10: Input with pull-up / pull-down
+				    11: Reserved               */		
+				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+				/* In output mode CNFy:
+				   00: General purpose output push-pull
+				   01: General purpose output Open-drain
+				   10: Alternate function output Push-pull
+				   11: Alternate function output Open-drain */
+				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			break;
+			
+			case PORTB:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{
+           	
+				GPIOB->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+
+				GPIOB->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOB->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			break;
+			
+			case PORTC:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{	
+				GPIOC->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+				GPIOC->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOC->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			break;
+			
+			case PORTD:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{		
+				GPIOD->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+				GPIOD->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			break;
+			
+			case PORTE:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{	
+				GPIOE->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+				GPIOE->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOE->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;			
+			break;
+			
+			case PORTF:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{		
+				GPIOF->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+				GPIOF->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOF->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			break;
+			
+			case PORTG:
+			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+			{
+				GPIOG->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
+			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+			{
+				GPIOG->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
+			}
+			else
+			{
+				/* do nothing */
+			}	
+				GPIOG->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			break;
+		}
+	}
 }   
    
 /* 
@@ -83,5 +209,6 @@ void Port_GetVersionInfo (Std_VersionInfoType* versioninfo)
 @Description        : Sets the port pin mode                          */
 void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 {
+	
 	
 }
