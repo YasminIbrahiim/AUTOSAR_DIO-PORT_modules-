@@ -7,6 +7,16 @@
 #include "Port.h"
 #include "Port_Regs.h"
 
+#define PORT_MASK_ID   0x00000010
+#define PIN_MASK_ID    0x00000001
+
+#define PORTA          0x00000010
+#define PORTB          0x00000020
+#define PORTC          0x00000030
+#define PORTD          0x00000040
+#define PORTE          0x00000050
+#define PORTF          0x00000060
+#define PORTG          0x00000070
 
 /*
 @Service Name       : Port_Init

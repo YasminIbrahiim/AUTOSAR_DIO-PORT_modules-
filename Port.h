@@ -166,18 +166,6 @@ typedef enum
 	OUTPUT_MAX_SPEED_50MHZ
 } enuOutputMax_speed;
 
-
-#define PORT_MASK_ID   0x00000010
-#define PIN_MASK_ID    0x00000001
-
-#define PORTA          0x00000010
-#define PORTB          0x00000020
-#define PORTC          0x00000030
-#define PORTD          0x00000040
-#define PORTE          0x00000050
-#define PORTF          0x00000060
-#define PORTG          0x00000070
-
 /*Port_Pin_ID */
 #define  PORTA_PIN0          (Port_PinType)0x00000000
 #define  PORTA_PIN1          (Port_PinType)0x00000001
@@ -309,8 +297,10 @@ void Port_Init (const Port_ConfigType* ConfigPtr);
 void Port_SetPinDirection (Port_PinType Pin, Port_PinDirectionType Direction);
 #endif
 
+#if  PortVersionInfoApi == STD_ON
 /* Description: Refreshes port direction.                       */
 void Port_RefreshPortDirection (void);
+#endif
 
 #if  PortVersionInfoApi == STD_ON
 /* Description: Returns the version information of this module. */
