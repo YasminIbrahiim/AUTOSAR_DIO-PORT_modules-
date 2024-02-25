@@ -22,12 +22,12 @@ typedef struct
 	uint32 GPIOx_LCKR;
 }GPIOx_REG;
 
-#define  GPIOA        *((volatile GPIOx_REG*)0x40010800)
-#define  GPIOB        *((volatile GPIOx_REG*)0x40010C00)
-#define  GPIOC        *((volatile GPIOx_REG*)0x40011000)
-#define  GPIOD        *((volatile GPIOx_REG*)0x40011400)
-#define  GPIOE        *((volatile GPIOx_REG*)0x40011800)
-#define  GPIOF        *((volatile GPIOx_REG*)0x40011C00)
-#define  GPIOG        *((volatile GPIOx_REG*)0x40012000)
+#define  GPIOA       ((volatile GPIOx_REG*)0x40010800)
+#define  GPIOB       ((volatile GPIOx_REG*)0x40010C00)
+#define  GPIOC       ((volatile GPIOx_REG*)0x40011000)
+#define  GPIOD       ((volatile GPIOx_REG*)0x40011400)
+#define  GPIOE       ((volatile GPIOx_REG*)0x40011800)
+#define  GPIOF       ((volatile GPIOx_REG*)0x40011C00)
+#define  GPIOG       ((volatile GPIOx_REG*)0x40012000)
 
 #endif  /* DIO_REGS_H */  

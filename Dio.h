@@ -10,13 +10,13 @@
 
 /* ID for the Vendor company 
    example: ID = 12          */ 
-#define PORT_VENDOR_ID      (12U)
+#define DIO_VENDOR_ID      (12U)
 
-/* Port Module ID */
-#define PORT_MODULE_ID      (110U)   
+/* Dio Module ID */
+#define DIO_MODULE_ID      (110U)   
 
-/* Port Instance ID */
-#define PORT_INSTANCE_ID    (0U)
+/* Dio Instance ID */
+#define DIO_INSTANCE_ID    (0U)
 
 /* Module Version 1.0.0 */
 #define DIO_SW_MAJOR_VERSION              (1U)
@@ -30,11 +30,20 @@
 
 #include "Std_Types.h"
 
-/* AUTOSAR checking between Std Types and Dio Module */
+/* AUTOSAR checking between Std_Types and Dio Module */
 #if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != DIO_AR_RELEASE_MAJOR_VERSION)\
  ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
  ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
   #error "The AR version of Std_Types.h does not match the expected version"
+#endif
+
+#include "PlatformTypes.h"
+
+/* AUTOSAR checking between Platform_Types and Dio Module */
+#if ((PLATFORM_TYPES_AR_RELEASE_MAJOR_VERSION != DIO_AR_RELEASE_MAJOR_VERSION)\
+ ||  (PLATFORM_TYPES_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
+ ||  (PLATFORM_TYPES_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Platform_Types.h does not match the expected version"
 #endif
 
 /* Dio Pre-Compile Configuration Header file */
@@ -52,6 +61,20 @@
  ||  (DIO_CFG_SW_MINOR_VERSION != DIO_SW_MINOR_VERSION)\
  ||  (DIO_CFG_SW_PATCH_VERSION != DIO_SW_PATCH_VERSION))
   #error "The SW version of Dio_Cfg.h does not match the expected version"
+#endif
+
+#include "Dio_LCfg.h"
+/* AUTOSAR Version checking between Dio_Lcfg.c and Dio.h files */
+#if ((DIO_LCFG_AR_RELEASE_MAJOR_VERSION != DIO_AR_RELEASE_MAJOR_VERSION)\
+ ||  (DIO_LCFG_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
+ ||  (DIO_LCFG_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Dio_Lcfg.c does not match the expected version"
+#endif
+/* Software Version checking between Dio_Lcfg.c and Dio.h files */
+#if ((DIO_LCFG_SW_MAJOR_VERSION != DIO_SW_MAJOR_VERSION)\
+ ||  (DIO_LCFG_SW_MINOR_VERSION != DIO_SW_MINOR_VERSION)\
+ ||  (DIO_LCFG_SW_PATCH_VERSION != DIO_SW_PATCH_VERSION))
+  #error "The SW version of Dio_Lcfg.c does not match the expected version"
 #endif
 
 /***************************** Development Error Types for DIO module *****************************/
@@ -72,10 +95,6 @@ typedef uint8  Dio_PinType    ; /*  Numeric ID of a DIO pin     */
 /* the type for the value of a DIO port 
    Dio_PortLevelType inherits the size of the largest port.*/
 typedef uint32  Dio_PortLevelType; 
-
-/* These are the possible levels a DIO channel can have (input or output) */
-#define STD_LOW    (Dio_LevelType)0x00
-#define STD_HIGH   (Dio_LevelType)0x01
 
 /* Type for the definition of a channel group, which consists of several adjoining 
 channels within a port. */
@@ -136,17 +155,17 @@ Dio_PortLevelType Dio_ReadChannelGroup (const Dio_ChannelGroupType* ChannelGroup
 /* Description: Service to set a subset of the adjoining bits of a port to a specified level. */
 void Dio_WriteChannelGroup (const Dio_ChannelGroupType* ChannelGroupIdPtr, Dio_PortLevelType Level);
 
-#if DioVersionInfoApi == true
+#if DioVersionInfoApi == STD_ON 
 /* Description: Service to get the version information of this module. */
 void Dio_GetVersionInfo (Std_VersionInfoType* VersionInfo);
 #endif 
 
-#if DioFlipChannelApi == true
+#if DioFlipChannelApi == STD_ON
 /* Description: Service to flip (change from 1 to 0 or from 0 to 1) the level of a channel and return the level of the channel after flip. */
 Dio_LevelType Dio_FlipChannel (Dio_ChannelType ChannelId);
 #endif
 
-#if DioMaskedWritePortApi == true 
+#if DioMaskedWritePortApi == STD_ON 
 /* Description: Service to set the value of a given port with required mask. */
 void Dio_MaskedWritePort (Dio_PortType PortId, Dio_PortLevelType Level, Dio_PortLevelType Mask);
 #endif

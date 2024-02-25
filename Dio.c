@@ -7,9 +7,8 @@
 
 #include "Dio.h"
 #include "Dio_Regs.h"
-#include "Dio_Cfg.h"
 
-#if (DioDevErrorDetect == true) 
+#if (DioDevErrorDetect == STD_ON) 
 #include "Det.h"
 
 /* AUTOSAR Version checking between Det and Dio Module */
@@ -108,65 +107,65 @@ void Dio_WriteChannel (Dio_ChannelType ChannelId, Dio_LevelType Level)
 	{
 		case PORTA:
 		if(Level == STD_HIGH )
-		{GPIOA->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOA->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOA->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOA->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{/*Do nothing */                                             }
+		{/*Do nothing */                                              }
 		break;   
 		
 		case PORTB:                              
 		if(Level == STD_HIGH )
-		{GPIOB->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOB->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOB->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOB->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{/*Do nothing */                                             }
+		{/*Do nothing */                                              }
 		break; 
 		
 		case PORTC:                              
 		if(Level == STD_HIGH )
-		{GPIOC->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOC->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOC->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOC->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{/*Do nothing */                                             }
+		{/*Do nothing */                                              }
 		break;  
 		
 		case PORTD:                              
 		if(Level == STD_HIGH )
-		{GPIOD->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOD->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOD->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOD->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{	/*Do nothing */                                          }
+		{	/*Do nothing */                                           }
 		break;
 		
 		case PORTE:                              
 		if(Level == STD_HIGH )
-		{GPIOE->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOE->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOE->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOE->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{/*Do nothing */                                             }
+		{/*Do nothing */                                              }
 		break; 
 		
 		case PORTF:                              
 		if(Level == STD_HIGH )
-		{GPIOF->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOF->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOF->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOF->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{/*Do nothing */                                             }
+		{/*Do nothing */                                              }
 		break; 
 		
 		case PORTG:                              
 		if(Level == STD_HIGH )
-		{GPIOG->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin))}
-		else if (level == STD_LOW)
-		{GPIOG->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin))}
+		{GPIOG->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
+		else if (Level == STD_LOW)
+		{GPIOG->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
 		else
-		{/*Do nothing */                                             }
+		{/*Do nothing */                                              }
 		break;
 		
 		default:
@@ -350,11 +349,11 @@ void Dio_WriteChannelGroup (const Dio_ChannelGroupType* ChannelGroupIdPtr, Dio_P
 @Description        : Service to get the version information of this module. */
 void Dio_GetVersionInfo (Std_VersionInfoType* VersionInfo)
 {
-	versioninfo->vendorID         = DIO_VENDOR_ID;
-	versioninfo->moduleID         = DIO_MODULE_ID;
-	versioninfo->sw_major_version = DIO_SW_MAJOR_VERSION;
-	versioninfo->sw_minor_version = DIO_SW_MINOR_VERSION;
-    versioninfo->sw_patch_version = DIO_SW_PATCH_VERSION;	
+	VersionInfo->vendorID         = DIO_VENDOR_ID;
+	VersionInfo->moduleID         = DIO_MODULE_ID;
+	VersionInfo->sw_major_version = DIO_SW_MAJOR_VERSION;
+	VersionInfo->sw_minor_version = DIO_SW_MINOR_VERSION;
+    VersionInfo->sw_patch_version = DIO_SW_PATCH_VERSION;	
 }
 
 /* 
