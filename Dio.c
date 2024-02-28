@@ -18,6 +18,8 @@
   #error "The AR version of Det.h does not match the expected version"
 #endif
 
+#endif
+
 /* 
 @Service Name       : Dio_ReadChannel
 @Service ID [hex]   : 0x00
@@ -33,60 +35,35 @@
 Dio_LevelType Dio_ReadChannel(Dio_ChannelType ChannelId)
 {
 	Dio_LevelType    Dio_ChannelLevelLOC = STD_LOW;
+	GPIOx_REG*       GPIO_BaseAddress = NULL_Ptr; 
 	switch(arrDio_Channels[ChannelId].port)
 	{
 		case PORTA:
-		if ( ((GPIOA->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
-		break;   
-		
-		case PORTB:                              
-		if ( ((GPIOB->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-		else
-		{Dio_ChannelLevelLOC = STD_LOW ; }
-		break; 
-		
-		case PORTC:                              
-		if ( ((GPIOC->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-		else
-		{Dio_ChannelLevelLOC = STD_LOW ; }
-		break;  
-		
-		case PORTD:                              
-	    if ( ((GPIOD->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-	    {Dio_ChannelLevelLOC = STD_HIGH; }
-		else
-		{Dio_ChannelLevelLOC = STD_LOW ; }
+		GPIO_BaseAddress = GPIOA;
 		break;
-		
-		case PORTE:                              
-		if ( ((GPIOE->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-	    {Dio_ChannelLevelLOC = STD_HIGH; }
-		else
-		{Dio_ChannelLevelLOC = STD_LOW ; }
-		break; 
-		
-		case PORTF:                              
-		if ( ((GPIOF->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-	    {Dio_ChannelLevelLOC = STD_HIGH; }
-		else
-		{Dio_ChannelLevelLOC = STD_LOW ; }
-		break; 
-		
-		case PORTG:                              
-		if ( ((GPIOG->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-	    {Dio_ChannelLevelLOC = STD_HIGH; }
-		else
-		{Dio_ChannelLevelLOC = STD_LOW ; }
+		case PORTB:
+		GPIO_BaseAddress = GPIOB;
 		break;
-		
-		default:
-		/* Do nothing */
+		case PORTC:
+		GPIO_BaseAddress = GPIOC;
+		break;
+		case PORTD:
+		GPIO_BaseAddress = GPIOD;
+		break;
+		case PORTE:
+		GPIO_BaseAddress = GPIOE;
+		break;
+		case PORTG:
+		GPIO_BaseAddress = GPIOF;
+		break;
 	}
+	if ( ((GPIO_BaseAddress->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
+	{
+		Dio_ChannelLevelLOC = STD_HIGH; 
+	}else
+	{
+		Dio_ChannelLevelLOC = STD_LOW ; 
+	}	
 	return Dio_ChannelLevelLOC;
 }
 
@@ -103,73 +80,39 @@ Dio_LevelType Dio_ReadChannel(Dio_ChannelType ChannelId)
 @Description        : Service to set a level of a channel.  */
 void Dio_WriteChannel (Dio_ChannelType ChannelId, Dio_LevelType Level)
 {
+	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
 	switch(arrDio_Channels[ChannelId].port)
 	{
 		case PORTA:
-		if(Level == STD_HIGH )
-		{GPIOA->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOA->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{/*Do nothing */                                              }
-		break;   
-		
-		case PORTB:                              
-		if(Level == STD_HIGH )
-		{GPIOB->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOB->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{/*Do nothing */                                              }
-		break; 
-		
-		case PORTC:                              
-		if(Level == STD_HIGH )
-		{GPIOC->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOC->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{/*Do nothing */                                              }
-		break;  
-		
-		case PORTD:                              
-		if(Level == STD_HIGH )
-		{GPIOD->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOD->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{	/*Do nothing */                                           }
+		GPIO_BaseAddress = GPIOA;
 		break;
-		
-		case PORTE:                              
-		if(Level == STD_HIGH )
-		{GPIOE->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOE->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{/*Do nothing */                                              }
-		break; 
-		
-		case PORTF:                              
-		if(Level == STD_HIGH )
-		{GPIOF->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOF->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{/*Do nothing */                                              }
-		break; 
-		
-		case PORTG:                              
-		if(Level == STD_HIGH )
-		{GPIOG->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));}
-		else if (Level == STD_LOW)
-		{GPIOG->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));}
-		else
-		{/*Do nothing */                                              }
+		case PORTB:
+		GPIO_BaseAddress = GPIOB;
 		break;
-		
-		default:
-		/* Do nothing */
+		case PORTC:
+		GPIO_BaseAddress = GPIOC;
+		break;
+		case PORTD:
+		GPIO_BaseAddress = GPIOD;
+		break;
+		case PORTE:
+		GPIO_BaseAddress = GPIOE;
+		break;
+		case PORTG:
+		GPIO_BaseAddress = GPIOF;
+		break;		
+	}
+	if(Level == STD_HIGH )
+	{
+		GPIO_BaseAddress->GPIOx_ODR |=  (1 << (arrDio_Channels[ChannelId].pin));
+	}
+	else if (Level == STD_LOW)
+	{
+		GPIO_BaseAddress->GPIOx_ODR |= ~(1 << (arrDio_Channels[ChannelId].pin));
+	}
+	else
+	{
+		/*Do nothing */                                              
 	}
 }
 
@@ -209,8 +152,6 @@ Dio_PortLevelType Dio_ReadPort(Dio_PortType PortId )
 	case PORTG:
 	Dio_PortLevel_LOC = (GPIOG->GPIOx_IDR);
 	break;
-	default:
-	/* Do nothing */
 	}
 	return Dio_PortLevel_LOC;
 }
@@ -251,8 +192,6 @@ void Dio_WritePort (Dio_PortType PortId, Dio_PortLevelType Level)
 	case PORTG:
 	GPIOG->GPIOx_ODR = Level;
 	break;
-	default:
-	/* Do nothing */
 	}
 }
 
@@ -332,8 +271,6 @@ void Dio_WriteChannelGroup (const Dio_ChannelGroupType* ChannelGroupIdPtr, Dio_P
 		case PORTG:
 		(GPIOG->GPIOx_ODR) |= Level&((ChannelGroupIdPtr->mask) << (ChannelGroupIdPtr->offset));
 		break;
-		default:
-		/* do nothing */
 	}
 }
 
@@ -374,64 +311,32 @@ Dio_LevelType Dio_FlipChannel (Dio_ChannelType ChannelId)
 	
 	switch(arrDio_Channels[ChannelId].port)
 	{
-		case PORTA:             
-		GPIOA->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);   
-		if ( ((GPIOA->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
-		break;   
-		
-		case PORTB:                              
-		GPIOB->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin); 
-		if ( ((GPIOB->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
-		break; 
-		
-		case PORTC:                              
-		GPIOC->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);
-		if ( ((GPIOC->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
-		break;  
-		
-		case PORTD:                              
-		GPIOD->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);  
-		if ( ((GPIOD->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
+		case PORTA:
+		GPIO_BaseAddress = GPIOA;
 		break;
-		
-		case PORTE:                              
-		GPIOE->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);  
-		if ( ((GPIOE->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
-		break; 
-		
-		case PORTF:                              
-		GPIOF->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);  
-		if ( ((GPIOF->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
-		break; 
-		
-		case PORTG:                              
-		GPIOG->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);  
-		if ( ((GPIOG->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
-		{Dio_ChannelLevelLOC = STD_HIGH; }
-	    else
-		{Dio_ChannelLevelLOC = STD_LOW ; }	
+		case PORTB:
+		GPIO_BaseAddress = GPIOB;
 		break;
-		
-		default:
-		/* Do nothing */
+		case PORTC:
+		GPIO_BaseAddress = GPIOC;
+		break;
+		case PORTD:
+		GPIO_BaseAddress = GPIOD;
+		break;
+		case PORTE:
+		GPIO_BaseAddress = GPIOE;
+		break;
+		case PORTG:
+		GPIO_BaseAddress = GPIOF;
+		break;		
+	}
+	GPIO_BaseAddress->GPIOx_ODR ^= 1 << (arrDio_Channels[ChannelId].pin);   
+	if ( ((GPIO_BaseAddress->GPIOx_IDR) >> (arrDio_Channels[ChannelId].pin)) & 1 )
+	{
+		Dio_ChannelLevelLOC = STD_HIGH; 
+	}else
+	{
+		Dio_ChannelLevelLOC = STD_LOW ; 
 	}
 	return Dio_ChannelLevelLOC;
 }
@@ -472,8 +377,6 @@ void Dio_MaskedWritePort (Dio_PortType PortId, Dio_PortLevelType Level, Dio_Port
 		case PORTG:
 		GPIOG->GPIOx_ODR |= (Level & Mask);
 		break;
-		default:
-		/* Do nothing */
 	}
 }
 

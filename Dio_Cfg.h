@@ -47,5 +47,4 @@ typedef uint32 DioChannelId;
 #define DIO_CHANNEL_A1     ((DioChannelId)0x00000001)
 #define DIO_CAHNNEL_E1     ((DioChannelId)0x00000002)
 
-extern Dio_ChannelCfg arrDio_Channels[NUM_OF_CHANNELS] ;
 #endif

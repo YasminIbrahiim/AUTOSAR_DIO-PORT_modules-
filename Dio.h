@@ -28,15 +28,6 @@
 #define DIO_AR_RELEASE_MINOR_VERSION      (4U)
 #define DIO_AR_RELEASE_PATCH_VERSION      (0U)
 
-#include "Std_Types.h"
-
-/* AUTOSAR checking between Std_Types and Dio Module */
-#if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != DIO_AR_RELEASE_MAJOR_VERSION)\
- ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
- ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
-  #error "The AR version of Std_Types.h does not match the expected version"
-#endif
-
 #include "PlatformTypes.h"
 
 /* AUTOSAR checking between Platform_Types and Dio Module */
@@ -44,6 +35,15 @@
  ||  (PLATFORM_TYPES_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
  ||  (PLATFORM_TYPES_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
   #error "The AR version of Platform_Types.h does not match the expected version"
+#endif 
+
+#include "Std_Types.h"
+
+/* AUTOSAR checking between Std_Types and Dio Module */
+#if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != DIO_AR_RELEASE_MAJOR_VERSION)\
+ ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
+ ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Std_Types.h does not match the expected version"
 #endif
 
 /* Dio Pre-Compile Configuration Header file */
