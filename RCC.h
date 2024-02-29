@@ -9,7 +9,7 @@
 #define RCC_H
 
 typedef uint32 ClockSourceType; /* This type is used to define the available clock sources */
-typedef uint32 PeripheralType;  /* This type is used to define the peripherals that is located on each bus*/
+typedef uint32 PeripheralType;  /* This type is used to define the peripherals that are located on each bus*/
 
 /* Three different clock sources can be used to drive the system clock (SYSCLK) */
 #define HSI     ((ClockSourceType)0)
@@ -105,16 +105,34 @@ typedef uint32 PeripheralType;  /* This type is used to define the peripherals t
 #define PLL_X15  ((uint32)13)
 #define PLL_X16  ((uint32)14)
 
+/* used to define ADC prescaler */
 #define PCLK2_DIVIDED_BY_2   ((uint32)0)
 #define PCLK2_DIVIDED_BY_4   ((uint32)1)
 #define PCLK2_DIVIDED_BY_6   ((uint32)2)
 #define PCLK2_DIVIDED_BY_8   ((uint32)3)
 
+
+/* PLL sources */
+#define  HSE_CLK_NOT_DIVIDED    ((uint32)0)
+#define  HSE_CLK_DIVIDED_BY_2   ((uint32)1)
+#define  HSI_CLK_DIVIDED_BY_2   ((uint32)2)
+
+/* Description: This function is used to initilize the clock for AHB , APB1 ,and APB2. */
 void RCC_ClockInit(void);
+
+/* Description: This function is used to set the clock for AHB peripherals. */
 void RCC_AHB_peripheral_Set_clock(PeripheralType  Peripheral);
+
+/*Description: This function is used to set the clock for APB1 peripherals. */
 void RCC_APB1_peripheral_Set_clock(PeripheralType  Peripheral);
+
+/*Description: This function is used to set the clock for APB2 peripherals. */
 void RCC_APB2_peripheral_Set_clock(PeripheralType  Peripheral);
+
+/*Description: This function is used to reset the clock for APB1 peripherals. */
 void RCC_APB1_peripheral_Reset_clock(PeripheralType  Peripheral);
+
+/*Description: This function is used to reset the clock for APB2 peripherals. */
 void RCC_APB2_peripheral_Reset_clock(PeripheralType  Peripheral);
 
 #endif  /* RCC_H */
