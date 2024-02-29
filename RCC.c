@@ -86,7 +86,7 @@ void RCC_ClockInit(void)
 @Description        : This function is used to set the clock for AHB peripherals. */
 void RCC_AHB_peripheral_Set_clock(PeripheralType  Peripheral)
 {
-	RCC->RCC_AHBENR  |= 1 << Peripheral;
+	RCC->RCC_AHBENR  |= 0x00000001 << Peripheral;
 }
 
 /* 
@@ -101,7 +101,7 @@ void RCC_AHB_peripheral_Set_clock(PeripheralType  Peripheral)
 @Description        : This function is used to set the clock for ABP1 peripherals. */
 void RCC_APB1_peripheral_Set_clock(PeripheralType  Peripheral)
 {
-	RCC->RCC_APB1ENR |= 1 << Peripheral;
+	RCC->RCC_APB1ENR |= 0x00000001 << Peripheral;
 }
 
 /* 
@@ -116,7 +116,7 @@ void RCC_APB1_peripheral_Set_clock(PeripheralType  Peripheral)
 @Description        : This function is used to set the clock for ABP2 peripherals. */
 void RCC_APB2_peripheral_Set_clock(PeripheralType  Peripheral)
 {
-	RCC->RCC_APB2ENR |= 1 << Peripheral;
+	RCC->RCC_APB2ENR |= 0x00000001 << Peripheral;
 }
 
 /* 
@@ -131,7 +131,7 @@ void RCC_APB2_peripheral_Set_clock(PeripheralType  Peripheral)
 @Description        : This function is used to reset the clock for ABP1 peripherals. */
 void RCC_APB1_peripheral_Reset_clock(PeripheralType  Peripheral)
 {
-	RCC->RCC_APB1RSTR |= 1 << Peripheral;
+	RCC->RCC_APB1RSTR |= 0x00000001 << Peripheral;
 }
 
 /* 
@@ -146,5 +146,5 @@ void RCC_APB1_peripheral_Reset_clock(PeripheralType  Peripheral)
 @Description        : This function is used to reset the clock for ABP2 peripherals. */
 void RCC_APB2_peripheral_Reset_clock(PeripheralType  Peripheral)
 {
-	RCC->RCC_APB2RSTR |= 1 << Peripheral;
+	RCC->RCC_APB2RSTR |= 0x00000001 << Peripheral;
 }
