@@ -27,15 +27,6 @@
 #define PORT_AR_RELEASE_MINOR_VERSION      (4U)
 #define PORT_AR_RELEASE_PATCH_VERSION      (0U)
 
-#include "Std_Types.h"
-
-/* AUTOSAR checking between Std Types and Port  */
-#if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
- ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
- ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
-  #error "The AR version of Std_Types.h does not match the expected version"
-#endif
-
 #include "PlatformTypes.h"
 
 /* AUTOSAR checking between Platform_Types and Port */
@@ -43,6 +34,15 @@
  ||  (PLATFORM_TYPES_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
  ||  (PLATFORM_TYPES_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
   #error "The AR version of PlatformTypes.h does not match the expected version"
+#endif
+ 
+#include "Std_Types.h"
+
+/* AUTOSAR checking between Std Types and Port  */
+#if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
+ ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
+ ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Std_Types.h does not match the expected version"
 #endif
 
 /* Port Pre-Compile Configuration Header file */
@@ -74,43 +74,11 @@
 #define PORT_E_UNINIT                 0x0F   /* API service called without module initialization              */
 #define PORT_E_PARAM_POINTER          0x10   /* APIs called with a Null Pointer                               */
 
-
 typedef enum
 {
 	PORT_PIN_LEVEL_HIGH,          /* Port Pin level is High  */
 	PORT_PIN_LEVEL_LOW            /* Port Pin level is LOW   */
 }PortPinLevelValueType;
-
-typedef struct
-{
-	Port_PinType              	    PortPinId;                  /* Pin Id of the port pin. This value will be assigned to the symbolic name derived from
-																   the port pin container short name. */
-	Port_PinModeType          	    PortPinMode;
-	enuInput_PinType	            Input_PinType;              /* parameter to set the Type of input pins and it takes one of the following values:
-																   INPUT_FLOATING, INPUT_PULLUP_PULLDOWN , ANALOG */
-	                                                             
-	enuOutput_PinType               Output_PinType;             /* parameter to set the Type of Output pins and it takes one of the following values:
-																   OUTPUT_OPEN_DRAIN, OUTPUT_PUSH_PULL,
-																   ALTERNATE_FUNCTION_PUSH_PULL , ALTERNATE_FUNCTION_OPEN_DRAIN */
-	enuOutputMax_speed				OutputMaxSpeed;	            /* This parameter is used to set the Maximumm speed of the output pin */
-	Port_PinDirectionType     	    PortPinDirection;           /* The initial direction of the pin (IN or OUT). If the direction is not changeable, 
-															       the value configured here is fixed. 
-															       PORT_PIN_IN  Port Pin direction set as input
-															       PORT_PIN_OUT Port Pin direction set as output */
-	PortPinDirectionChangeableType  PortPinDirectionChangeable; /* Parameter to indicate if the direction is changeable on a port pin during runtime.
-																   true: Port Pin direction changeable enabled. 
-																   false: Port Pin direction changeable disabled */                      
-	PortPinInitialModeType          PortPinInitialMode;         /* Port pin mode from mode list for use with Port_Init() function. */
-	PortPinLevelValueType           PortPinLevelValue;          /* PORT_PIN_LEVEL_HIGH Port Pin level is High
-																   PORT_PIN_LEVEL_LOW  Port Pin level is LOW     */   
-	PortPinModeChangeableType       PortPinModeChangeable;
-}Port_PinConfigType;
-
-/* Type of the external data structure containing the initialization data for this module */
-typedef struct
-{
-	Port_PinConfigType arrPort_PinConfig[NUMBER_OF_PORT_PINS];
-}Port_ConfigType;
 
 typedef uint32 Port_PinType;       /* Data type for the symbolic name of a port pin */
 typedef enum 
@@ -123,6 +91,10 @@ typedef uint32   PortPinInitialModeType;
 typedef Boolean  PortPinModeChangeableType;       /* Parameter to indicate if the mode is changeable on a port pin during runtime. 
 													True:  Port Pin mode changeable allowed. 
 													False: Port Pin mode changeable not permitted. */
+typedef uint32   AFIO_Periph_mappingType;
+typedef uint32   Port_PinAFIOPeriphType;          
+typedef uint32   Port_PinAFIOPeriphChangeableType;
+
 typedef enum
 {  
 	PORT_PIN_MODE_ADC,       /* Port Pin used by ADC   */                                                                 
@@ -138,7 +110,10 @@ typedef enum
 	PORT_PIN_MODE_LIN,       /* Port Pin used for LIN  */
 	PORT_PIN_MODE_MEM,       /* Port Pin used for external memory under control of a memory driver */
 	PORT_PIN_MODE_PWM,       /* Port Pin used by PWM Range */
-	PORT_PIN_MODE_SPI        /* Port Pin used by SPI       */
+	PORT_PIN_MODE_SPI,       /* Port Pin used by SPI       */
+	PORT_PIN_MODE_USART,     /* Port Pin used by USART     */
+	PORT_PIN_MODE_I2C,       /* Port Pin used by I2C       */
+	PORT_PIN_MODE_DAC        /* Port Pin used by DAC       */
 } Port_PinModeType;
 
 typedef enum
@@ -151,8 +126,8 @@ typedef enum
 
 typedef enum
 {
-	OUTPUT_OPEN_DRAIN,
 	OUTPUT_PUSH_PULL,
+	OUTPUT_OPEN_DRAIN,
 	ALTERNATE_FUNCTION_PUSH_PULL,
 	ALTERNATE_FUNCTION_OPEN_DRAIN,
 	INPUT_PIN_NONE
@@ -184,7 +159,6 @@ typedef enum
 #define  PORTA_PIN14         (Port_PinType)0x0000000E
 #define  PORTA_PIN15         (Port_PinType)0x0000000F
 
-                                     
 #define  PORTB_PIN0          (Port_PinType)0x00000010
 #define  PORTB_PIN1          (Port_PinType)0x00000011
 #define  PORTB_PIN2          (Port_PinType)0x00000012
@@ -287,8 +261,75 @@ typedef enum
 #define  PORTG_PIN14         (Port_PinType)0x0000006E
 #define  PORTG_PIN15         (Port_PinType)0x0000006F
 
-/*********************************  Function prototype *****************************************/ 
+typedef struct
+{
+	Port_PinType              	      PortPinId;                        /* Pin Id of the port pin. This value will be assigned to the symbolic name derived from
+									  							           the port pin container short name. */
+	Port_PinModeType          	      PortPinMode;                      
+	enuInput_PinType	              Input_PinType;                    /* parameter to set the Type of input pins and it takes one of the following values:
+									  							           INPUT_FLOATING, INPUT_PULLUP_PULLDOWN , ANALOG */
+	                                                                     
+	enuOutput_PinType                 Output_PinType;                   /* parameter to set the Type of Output pins and it takes one of the following values:
+									  							           OUTPUT_OPEN_DRAIN, OUTPUT_PUSH_PULL,
+									  							           ALTERNATE_FUNCTION_PUSH_PULL , ALTERNATE_FUNCTION_OPEN_DRAIN */
+	enuOutputMax_speed				  OutputMaxSpeed;	                /* This parameter is used to set the Maximumm speed of the output pin */
+	Port_PinDirectionType     	      PortPinDirection;                 /* The initial direction of the pin (IN or OUT). If the direction is not changeable, 
+									  						               the value configured here is fixed. 
+									  						               PORT_PIN_IN  Port Pin direction set as input
+									  						               PORT_PIN_OUT Port Pin direction set as output */
+	PortPinDirectionChangeableType    PortPinDirectionChangeable;       /* Parameter to indicate if the direction is changeable on a port pin during runtime.
+									  							           true: Port Pin direction changeable enabled. 
+									  							           false: Port Pin direction changeable disabled */                      
+	PortPinInitialModeType            PortPinInitialMode;               /* Port pin mode from mode list for use with Port_Init() function. */
+	PortPinLevelValueType             PortPinLevelValue;                /* PORT_PIN_LEVEL_HIGH Port Pin level is High
+									  							           PORT_PIN_LEVEL_LOW  Port Pin level is LOW     */   
+	PortPinModeChangeableType         PortPinModeChangeable;
+	Port_PinAFIOPeriphType            Port_PinAFIOPeriph;
+	Port_PinAFIOPeriphChangeableType  Port_PinAFIOPeriphChangeable;        	
+}Port_PinConfigType;
 
+#define CAN      ((Port_PinAFIOPeriph)0)
+#define ADC1     ((Port_PinAFIOPeriph)1)
+#define ADC2     ((Port_PinAFIOPeriph)2)
+#define ADC3     ((Port_PinAFIOPeriph)3)
+#define USART1   ((Port_PinAFIOPeriph)4)
+#define USART2   ((Port_PinAFIOPeriph)5)
+#define USART3   ((Port_PinAFIOPeriph)6)
+#define USART4   ((Port_PinAFIOPeriph)7)
+#define USART5   ((Port_PinAFIOPeriph)8)
+#define TIM1     ((Port_PinAFIOPeriph)9)
+#define TIM2     ((Port_PinAFIOPeriph)10)
+#define TIM3     ((Port_PinAFIOPeriph)11)
+#define TIM4     ((Port_PinAFIOPeriph)12)
+#define TIM5     ((Port_PinAFIOPeriph)13)
+#define TIM6     ((Port_PinAFIOPeriph)14)
+#define TIM7     ((Port_PinAFIOPeriph)15)
+#define TIM8     ((Port_PinAFIOPeriph)16)
+#define TIM9     ((Port_PinAFIOPeriph)17)
+#define TIM10    ((Port_PinAFIOPeriph)18)
+#define TIM11    ((Port_PinAFIOPeriph)19)
+#define TIM12    ((Port_PinAFIOPeriph)20)
+#define TIM13    ((Port_PinAFIOPeriph)21)
+#define TIM14    ((Port_PinAFIOPeriph)22)
+#define I2C1     ((Port_PinAFIOPeriph)23)
+#define I2C2     ((Port_PinAFIOPeriph)24)
+#define DAC      ((Port_PinAFIOPeriph)25)
+#define SPI1     ((Port_PinAFIOPeriph)26)
+#define SPI2     ((Port_PinAFIOPeriph)27)
+#define SPI3     ((Port_PinAFIOPeriph)28)
+#define DMA1     ((Port_PinAFIOPeriph)29)
+#define DMA2     ((Port_PinAFIOPeriph)30)
+#define SRAM     ((Port_PinAFIOPeriph)31)
+#define FLITF    ((Port_PinAFIOPeriph)32)
+#define CRC      ((Port_PinAFIOPeriph)33)
+#define FSMC     ((Port_PinAFIOPeriph)34)
+#define SDIO     ((Port_PinAFIOPeriph)35)
+#define USB      ((Port_PinAFIOPeriph)36)
+#define BKP      ((Port_PinAFIOPeriph)37)
+#define PWR      ((Port_PinAFIOPeriph)38)
+#define WWDG     ((Port_PinAFIOPeriph)39)
+#define DIO      ((Port_PinAFIOPeriph)40)
+/*********************************  Function prototype *****************************************/ 
 /* Description: Initializes the Port Driver module              */
 void Port_Init (const Port_ConfigType* ConfigPtr);   
    

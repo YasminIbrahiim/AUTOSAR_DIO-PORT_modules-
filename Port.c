@@ -7,6 +7,20 @@
 #include "Port.h"
 #include "Port_Regs.h"
 
+#if (DioDevErrorDetect == STD_ON) 
+#include "Det.h"
+
+/* AUTOSAR Version checking between Det and Port Module */
+#if ((DET_AR_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
+ || (DET_AR_MINOR_VERSION  != PORT_AR_RELEASE_MINOR_VERSION)\
+ || (DET_AR_PATCH_VERSION  != PORT_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Det.h does not match the expected version"
+#endif
+
+#endif
+
+Port_ConfigType  PortConfigPtr = NULL_Ptr;
+
 #define PORT_MASK_ID   0x00000010
 #define PIN_MASK_ID    0x00000001
 
@@ -30,129 +44,306 @@
 @Description        : Initializes the Port Driver module      */
 void Port_Init (const Port_ConfigType* ConfigPtr)
 {
-	uint32  PortTypeLOC = ConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID ;
-	uint32  PinTypeLOC  = ConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PIN_MASK_ID  ;
+	uint32      PortTypeLOC ;
+	uint32      PinTypeLOC  ;
+	PortConfigPtr = ConfigPtr;
+	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;   
 	for(uint8 u8Counter = 0 ;u8Counter < PortNumberOfPortPins ; u8Counter++ )
 	{
+		PortTypeLOC = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID ;
+		PinTypeLOC  = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PIN_MASK_ID  ;
 		switch(PortTypeLOC)
 		{
 			case PORTA:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{
-				/* In input mode CNFy:
-				    00: Analog mode
-				    01: Floating input (reset state)
-				    10: Input with pull-up / pull-down
-				    11: Reserved               */		
-				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-				/* In output mode CNFy:
-				   00: General purpose output push-pull
-				   01: General purpose output Open-drain
-				   10: Alternate function output Push-pull
-				   11: Alternate function output Open-drain */
-				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			GPIO_BaseAddress = GPIOA;
+			RCC_APB2_peripheral_Set_clock(GPIOA_APB2_PERIPHERAL);
 			break;
-			
 			case PORTB:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{
-           	
-				GPIOB->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-
-				GPIOB->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOB->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			GPIO_BaseAddress = GPIOB;
+			RCC_APB2_peripheral_Set_clock(GPIOB_APB2_PERIPHERAL);
 			break;
-			
 			case PORTC:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{	
-				GPIOC->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-				GPIOC->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOC->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			GPIO_BaseAddress = GPIOC;
+			RCC_APB2_peripheral_Set_clock(GPIOC_APB2_PERIPHERAL);
 			break;
-			
 			case PORTD:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{		
-				GPIOD->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-				GPIOD->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOA->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			GPIO_BaseAddress = GPIOD;
+			RCC_APB2_peripheral_Set_clock(GPIOD_APB2_PERIPHERAL);
 			break;
-			
 			case PORTE:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{	
-				GPIOE->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-				GPIOE->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOE->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;			
+			GPIO_BaseAddress = GPIOE;
+			RCC_APB2_peripheral_Set_clock(GPIOE_APB2_PERIPHERAL);
 			break;
-			
 			case PORTF:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{		
-				GPIOF->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-				GPIOF->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOF->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			GPIO_BaseAddress = GPIOF;
+			RCC_APB2_peripheral_Set_clock(GPIOF_APB2_PERIPHERAL);
 			break;
-			
 			case PORTG:
-			if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
-			{
-				GPIOG->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuInput_PinType) << (2 + (PinTypeLOC * 4));
-			}else if((ConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
-			{
-				GPIOG->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].enuOutput_PinType) << (2 + (PinTypeLOC * 4));
-			}
-			else
-			{
-				/* do nothing */
-			}	
-				GPIOG->GPIOx_CRL |= (ConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+			RCC_APB2_peripheral_Set_clock(GPIOG_APB2_PERIPHERAL);
+			GPIO_BaseAddress = GPIOG;
 			break;
 		}
+		if((PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_IN)
+		{
+			/*  In input mode CNFy:
+			    00: Analog mode
+			    01: Floating input (reset state)
+			    10: Input with pull-up / pull-down
+			    11: Reserved               */		
+			GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[u8Counter].Input_PinType) << (2 + (PinTypeLOC * 4));
+		}else if((PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirection ) == PORT_PIN_OUT)
+		{
+			/* In output mode CNFy:
+			   00: General purpose output push-pull
+			   01: General purpose output Open-drain
+			   10: Alternate function output Push-pull
+			   11: Alternate function output Open-drain */
+			GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[u8Counter].Output_PinType) << (2 + (PinTypeLOC * 4));
+			GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+		}
+		else
+		{
+			/* do nothing */
+		}
+		
+		if((PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinMode) != PORT_PIN_MODE_DIO)
+		{
+			RCC_APB2_peripheral_Set_clock(AFIO_APB2_PERIPHERAL);
+		}
+		switch((PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinMode))
+		{
+			case  PORT_PIN_MODE_ADC: 
+			/* enable ADC clock */
+			/* AFIO pin mapping */
+				if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC1)
+				{
+					RCC_APB2_peripheral_Set_clock(ADC1_APB2_PERIPHERAL);
+				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC2)
+				{
+					RCC_APB2_peripheral_Set_clock(ADC2_APB2_PERIPHERAL); 
+				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC3)
+				{
+					RCC_APB2_peripheral_Set_clock(ADC3_APB2_PERIPHERAL);
+				}
+			break;
+			case  PORT_PIN_MODE_CAN:
+				RCC_APB1_peripheral_Set_clock(CAN_APB1_PERIPHERAL);
+			break;		
+			case  PORT_PIN_MODE_DIO:
+				/* do nothing */
+			break;
+			// Set general purpose timer clock */
+			case PORT_PIN_MODE_DIO_GPT: 
+				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				{	
+					case TIM1 : 
+					RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
+					break; 
+					case TIM2 : 
+					RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
+					break;
+					case TIM3 : 
+					RCC_APB1_peripheral_Reset_clock(TIM3_APB1_PERIPHERAL);
+					break;
+					case TIM4 : 
+					RCC_APB1_peripheral_Reset_clock(TIM4_APB1_PERIPHERAL);
+					break;
+					case TIM5 :
+					RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
+					break;
+					case TIM6 : 
+					RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
+					break;
+					case TIM7 : 
+					RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
+					break;
+					case TIM8 : 
+					RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
+					break;
+					case TIM9 : 
+					RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
+					break;
+					case TIM10: 
+					RCC_APB2_peripheral_Reset_clock(TIM10_APB2_PERIPHERAL);
+					break;
+					case TIM11: 
+					RCC_APB2_peripheral_Reset_clock(TIM11_APB2_PERIPHERAL);
+					break;
+					case TIM12: 
+					RCC_APB1_peripheral_Reset_clock(TIM12_APB1_PERIPHERAL);
+					break;
+					case TIM13: 
+					RCC_APB1_peripheral_Reset_clock(TIM13_APB1_PERIPHERAL);
+					break;
+					case TIM14: 
+					RCC_APB1_peripheral_Reset_clock(TIM14_APB1_PERIPHERAL);
+					break;	
+				}
+			break;
+			case  PORT_PIN_MODE_DIO_WDG:
+				RCC_APB1_peripheral_Reset_clock(WWDG_APB1_PERIPHERAL);
+			break;
+			case  PORT_PIN_MODE_ICU: 
+				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				{	
+					case TIM1 : 
+					RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
+					break; 
+					case TIM2 : 
+					RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
+					break;
+					case TIM3 : 
+					RCC_APB1_peripheral_Reset_clock(TIM3_APB1_PERIPHERAL);
+					break;
+					case TIM4 : 
+					RCC_APB1_peripheral_Reset_clock(TIM4_APB1_PERIPHERAL);
+					break;
+					case TIM5 :
+					RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
+					break;
+					case TIM6 : 
+					RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
+					break;
+					case TIM7 : 
+					RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
+					break;
+					case TIM8 : 
+					RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
+					break;
+					case TIM9 : 
+					RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
+					break;
+					case TIM10: 
+					RCC_APB2_peripheral_Reset_clock(TIM10_APB2_PERIPHERAL);
+					break;
+					case TIM11: 
+					RCC_APB2_peripheral_Reset_clock(TIM11_APB2_PERIPHERAL);
+					break;
+					case TIM12: 
+					RCC_APB1_peripheral_Reset_clock(TIM12_APB1_PERIPHERAL);
+					break;
+					case TIM13: 
+					RCC_APB1_peripheral_Reset_clock(TIM13_APB1_PERIPHERAL);
+					break;
+					case TIM14: 
+					RCC_APB1_peripheral_Reset_clock(TIM14_APB1_PERIPHERAL);
+					break;	
+				}
+			break;	
+			case  PORT_PIN_MODE_MEM: 
+				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				{
+					case DMA1 : 
+					RCC_AHB1_peripheral_Reset_clock(DMA1_AHB_PERIPHERAL );
+					break;
+					case DMA2 : 
+					RCC_AHB1_peripheral_Reset_clock(DMA2_AHB_PERIPHERAL );
+					break;
+					case SRAM : 
+					RCC_AHB1_peripheral_Reset_clock(SRAM_AHB_PERIPHERAL );
+					break;
+					case FLITF: 
+					RCC_AHB1_peripheral_Reset_clock(FLITF_AHB_PERIPHERAL);
+					break;  
+					case FSMC : 
+					RCC_AHB1_peripheral_Reset_clock(FSMC_AHB_PERIPHERAL );
+					break;
+				}                                            
+			break;
+			case  PORT_PIN_MODE_PWM:
+				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				{	
+					case TIM1 : 
+					RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
+					break; 
+					case TIM2 : 
+					RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
+					break;
+					case TIM3 : 
+					RCC_APB1_peripheral_Reset_clock(TIM3_APB1_PERIPHERAL);
+					break;
+					case TIM4 : 
+					RCC_APB1_peripheral_Reset_clock(TIM4_APB1_PERIPHERAL);
+					break;
+					case TIM5 : 
+					RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
+					break;
+					case TIM6 : 
+					RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
+					break;
+					case TIM7 : 
+					RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
+					break;
+					case TIM8 : 
+					RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
+					break;
+					case TIM9 : 
+					RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
+					break;
+					case TIM10: 
+					RCC_APB2_peripheral_Reset_clock(TIM10_APB2_PERIPHERAL);
+					break;
+					case TIM11: 
+					RCC_APB2_peripheral_Reset_clock(TIM11_APB2_PERIPHERAL);
+					break;
+					case TIM12: 
+					RCC_APB1_peripheral_Reset_clock(TIM12_APB1_PERIPHERAL);
+					break;
+					case TIM13: 
+					RCC_APB1_peripheral_Reset_clock(TIM13_APB1_PERIPHERAL);
+					break;
+					case TIM14: 
+					RCC_APB1_peripheral_Reset_clock(TIM14_APB1_PERIPHERAL);
+					break;	
+				}	
+			break;
+			case  PORT_PIN_MODE_SPI:
+				if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI1)
+				{
+					RCC_APB2_peripheral_Set_clock(SPI1_APB2_PERIPHERAL);
+				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI2)
+				{
+					RCC_APB1_peripheral_Set_clock(SPI2_APB1_PERIPHERAL); 
+				}
+				else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI3)
+				{
+					RCC_APB1_peripheral_Set_clock(SPI3_APB1_PERIPHERAL);
+				}
+			break;
+			case  PORT_PIN_MODE_I2C:
+				if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == I2C1)
+				{
+					RCC_APB1_peripheral_Set_clock(I2C1_APB2_PERIPHERAL);
+				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == I2C2)
+				{
+					RCC_APB1_peripheral_Set_clock(I2C2_APB1_PERIPHERAL); 
+				}
+			break;
+			case  PORT_PIN_MODE_USART:
+				switch
+				{
+					case USART1:
+					RCC_APB2_peripheral_Set_clock(USART1_APB2_PERIPHERAL);
+					break;
+					case USART2:
+					RCC_APB1_peripheral_Set_clock(USART2_APB1_PERIPHERAL);
+					break;
+					case USART3:
+					RCC_APB1_peripheral_Set_clock(USART3_APB1_PERIPHERAL);
+					break;
+					case USART4:
+					RCC_APB1_peripheral_Set_clock(USART4_APB1_PERIPHERAL);
+					break;
+					case USART5: 
+					RCC_APB1_peripheral_Set_clock(USART5_APB1_PERIPHERAL);
+					break;
+				}
+			break;	
+			case PORT_PIN_MODE_DAC:
+				RCC_APB1_peripheral_Set_clock(DAC_APB1_PERIPHERAL);
+			break;
+		}
+		
 	}
 }   
    
@@ -169,7 +360,62 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 @Description        : Sets the port pin direction                */
 void Port_SetPinDirection (Port_PinType Pin, Port_PinDirectionType Direction)
 {
-	
+	PortTypeLOC = Pin & PORT_MASK_ID ;
+	PinTypeLOC  = Pin & PIN_MASK_ID  ;
+	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
+	switch(PortTypeLOC)
+	{
+		case PORTA:
+		GPIO_BaseAddress = GPIOA;
+		RCC_APB2_peripheral_Set_clock(GPIOA_APB2_PERIPHERAL);
+		break;
+		case PORTB:
+		GPIO_BaseAddress = GPIOB;
+		RCC_APB2_peripheral_Set_clock(GPIOB_APB2_PERIPHERAL);
+		break;
+		case PORTC:
+		GPIO_BaseAddress = GPIOC;
+		RCC_APB2_peripheral_Set_clock(GPIOC_APB2_PERIPHERAL);
+		break;
+		case PORTD:
+		GPIO_BaseAddress = GPIOD;
+		RCC_APB2_peripheral_Set_clock(GPIOD_APB2_PERIPHERAL);
+		break;
+		case PORTE:
+		GPIO_BaseAddress = GPIOE;
+		RCC_APB2_peripheral_Set_clock(GPIOE_APB2_PERIPHERAL);
+		break;
+		case PORTF:
+		GPIO_BaseAddress = GPIOF;
+		RCC_APB2_peripheral_Set_clock(GPIOF_APB2_PERIPHERAL);
+		break;
+		case PORTG:
+		RCC_APB2_peripheral_Set_clock(GPIOG_APB2_PERIPHERAL);
+		GPIO_BaseAddress = GPIOG;
+		break;
+	}
+	if(Direction == PORT_PIN_IN)
+	{
+		/*  In input mode CNFy:
+		    00: Analog mode
+		    01: Floating input (reset state)
+		    10: Input with pull-up / pull-down
+		    11: Reserved               */		
+		GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[Pin].Input_PinType) << (2 + (PinTypeLOC * 4));
+	}else if(Direction == PORT_PIN_OUT)
+	{
+		/* In output mode CNFy:
+		   00: General purpose output push-pull
+		   01: General purpose output Open-drain
+		   10: Alternate function output Push-pull
+		   11: Alternate function output Open-drain */
+		GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[Pin].Output_PinType) << (2 + (PinTypeLOC * 4));
+		GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[Pin].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+	}
+	else
+	{
+		/* do nothing */
+	}
 }
 
 /* 
@@ -184,7 +430,67 @@ void Port_SetPinDirection (Port_PinType Pin, Port_PinDirectionType Direction)
 @Description        : Refreshes port direction.                   */
 void Port_RefreshPortDirection (void)
 {
-	
+	uint32      PortTypeLOC ;
+	uint32      PinTypeLOC  ;
+	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
+	for(uint8 u8Counter = 0 ;u8Counter < PortNumberOfPortPins ; u8Counter++ )
+	{
+		PortTypeLOC = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID ;
+		PinTypeLOC  = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PIN_MASK_ID  ;
+		switch(PortTypeLOC)
+		{
+			case PORTA:
+			GPIO_BaseAddress = GPIOA;
+			RCC_APB2_peripheral_Set_clock(GPIOA_APB2_PERIPHERAL);
+			break;
+			case PORTB:
+			GPIO_BaseAddress = GPIOB;
+			RCC_APB2_peripheral_Set_clock(GPIOB_APB2_PERIPHERAL);
+			break;
+			case PORTC:
+			GPIO_BaseAddress = GPIOC;
+			RCC_APB2_peripheral_Set_clock(GPIOC_APB2_PERIPHERAL);
+			break;
+			case PORTD:
+			GPIO_BaseAddress = GPIOD;
+			RCC_APB2_peripheral_Set_clock(GPIOD_APB2_PERIPHERAL);
+			break;
+			case PORTE:
+			GPIO_BaseAddress = GPIOE;
+			RCC_APB2_peripheral_Set_clock(GPIOE_APB2_PERIPHERAL);
+			break;
+			case PORTF:
+			GPIO_BaseAddress = GPIOF;
+			RCC_APB2_peripheral_Set_clock(GPIOF_APB2_PERIPHERAL);
+			break;
+			case PORTG:
+			RCC_APB2_peripheral_Set_clock(GPIOG_APB2_PERIPHERAL);
+			GPIO_BaseAddress = GPIOG;
+			break;
+		}
+		if((PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirectionChangeable ) == PORT_PIN_IN)
+		{
+			/*  In input mode CNFy:
+			    00: Analog mode
+			    01: Floating input (reset state)
+			    10: Input with pull-up / pull-down
+			    11: Reserved               */		
+			GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[u8Counter].Input_PinType) << (2 + (PinTypeLOC * 4));
+		}else if((PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinDirectionChangeable ) == PORT_PIN_OUT)
+		{
+			/* In output mode CNFy:
+			   00: General purpose output push-pull
+			   01: General purpose output Open-drain
+			   10: Alternate function output Push-pull
+			   11: Alternate function output Open-drain */
+			GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[u8Counter].Output_PinType) << (2 + (PinTypeLOC * 4));
+			GPIO_BaseAddress->GPIOx_CRL |= (PortConfigPtr->arrPort_PinConfig[u8Counter].OutputMaxSpeed) << (PinTypeLOC * 4) ;
+		}
+		else
+		{
+			/* do nothing */
+		}	
+	}
 }
 
 /* 
@@ -219,6 +525,277 @@ void Port_GetVersionInfo (Std_VersionInfoType* versioninfo)
 @Description        : Sets the port pin mode                          */
 void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 {
-	
-	
+	PortTypeLOC = Pin & PORT_MASK_ID ;
+	PinTypeLOC  = Pin & PIN_MASK_ID  ;
+	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
+	/* enable GPIO driver clock */
+	/* enable AFIO */
+	switch(PortTypeLOC)
+	{
+		case PORTA:
+		GPIO_BaseAddress = GPIOA;
+		RCC_APB2_peripheral_Set_clock(GPIOA_APB2_PERIPHERAL);
+		break;
+		case PORTB:
+		GPIO_BaseAddress = GPIOB;
+		RCC_APB2_peripheral_Set_clock(GPIOB_APB2_PERIPHERAL);
+		break;
+		case PORTC:
+		GPIO_BaseAddress = GPIOC;
+		RCC_APB2_peripheral_Set_clock(GPIOC_APB2_PERIPHERAL);
+		break;
+		case PORTD:
+		GPIO_BaseAddress = GPIOD;
+		RCC_APB2_peripheral_Set_clock(GPIOD_APB2_PERIPHERAL);
+		break;
+		case PORTE:
+		GPIO_BaseAddress = GPIOE;
+		RCC_APB2_peripheral_Set_clock(GPIOE_APB2_PERIPHERAL);
+		break;
+		case PORTF:
+		GPIO_BaseAddress = GPIOF;
+		RCC_APB2_peripheral_Set_clock(GPIOF_APB2_PERIPHERAL);
+		break;
+		case PORTG:
+		RCC_APB2_peripheral_Set_clock(GPIOG_APB2_PERIPHERAL);
+		GPIO_BaseAddress = GPIOG;
+		break;
+	}
+	if(Mode != PORT_PIN_MODE_DIO)
+	{
+		RCC_APB2_peripheral_Set_clock(AFIO_APB2_PERIPHERAL);
+	}
+	switch(Mode)
+	{
+		case  PORT_PIN_MODE_ADC: 
+		/* enable ADC clock */
+		/* AFIO pin mapping */
+			if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC1)
+			{
+				RCC_APB2_peripheral_Set_clock(ADC1_APB2_PERIPHERAL);
+			}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC2)
+			{
+				RCC_APB2_peripheral_Set_clock(ADC2_APB2_PERIPHERAL); 
+			}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC3)
+			{
+				RCC_APB2_peripheral_Set_clock(ADC3_APB2_PERIPHERAL);
+			}
+		break;
+		case  PORT_PIN_MODE_CAN:
+			RCC_APB1_peripheral_Set_clock(CAN_APB1_PERIPHERAL);
+		break;		
+		case  PORT_PIN_MODE_DIO:
+			/* do nothing */
+		break;
+		// Set general purpose timer clock */
+		case PORT_PIN_MODE_DIO_GPT: 
+			switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+			{	
+				case TIM1 : 
+				RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
+				break; 
+				case TIM2 : 
+				RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
+				break;
+				case TIM3 : 
+				RCC_APB1_peripheral_Reset_clock(TIM3_APB1_PERIPHERAL);
+				break;
+				case TIM4 : 
+				RCC_APB1_peripheral_Reset_clock(TIM4_APB1_PERIPHERAL);
+				break;
+				case TIM5 :
+				RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
+				break;
+				case TIM6 : 
+				RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
+				break;
+				case TIM7 : 
+				RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
+				break;
+				case TIM8 : 
+				RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
+				break;
+				case TIM9 : 
+				RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
+				break;
+				case TIM10: 
+				RCC_APB2_peripheral_Reset_clock(TIM10_APB2_PERIPHERAL);
+				break;
+				case TIM11: 
+				RCC_APB2_peripheral_Reset_clock(TIM11_APB2_PERIPHERAL);
+				break;
+				case TIM12: 
+				RCC_APB1_peripheral_Reset_clock(TIM12_APB1_PERIPHERAL);
+				break;
+				case TIM13: 
+				RCC_APB1_peripheral_Reset_clock(TIM13_APB1_PERIPHERAL);
+				break;
+				case TIM14: 
+				RCC_APB1_peripheral_Reset_clock(TIM14_APB1_PERIPHERAL);
+				break;	
+			}
+		break;
+		case  PORT_PIN_MODE_DIO_WDG:
+			RCC_APB1_peripheral_Reset_clock(WWDG_APB1_PERIPHERAL);
+		break;
+		case  PORT_PIN_MODE_ICU: 
+			switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+			{	
+				case TIM1 : 
+				RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
+				break; 
+				case TIM2 : 
+				RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
+				break;
+				case TIM3 : 
+				RCC_APB1_peripheral_Reset_clock(TIM3_APB1_PERIPHERAL);
+				break;
+				case TIM4 : 
+				RCC_APB1_peripheral_Reset_clock(TIM4_APB1_PERIPHERAL);
+				break;
+				case TIM5 :
+				RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
+				break;
+				case TIM6 : 
+				RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
+				break;
+				case TIM7 : 
+				RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
+				break;
+				case TIM8 : 
+				RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
+				break;
+				case TIM9 : 
+				RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
+				break;
+				case TIM10: 
+				RCC_APB2_peripheral_Reset_clock(TIM10_APB2_PERIPHERAL);
+				break;
+				case TIM11: 
+				RCC_APB2_peripheral_Reset_clock(TIM11_APB2_PERIPHERAL);
+				break;
+				case TIM12: 
+				RCC_APB1_peripheral_Reset_clock(TIM12_APB1_PERIPHERAL);
+				break;
+				case TIM13: 
+				RCC_APB1_peripheral_Reset_clock(TIM13_APB1_PERIPHERAL);
+				break;
+				case TIM14: 
+				RCC_APB1_peripheral_Reset_clock(TIM14_APB1_PERIPHERAL);
+				break;	
+			}
+		break;	
+		case  PORT_PIN_MODE_MEM: 
+			switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+			{
+				case DMA1 : 
+				RCC_AHB1_peripheral_Reset_clock(DMA1_AHB_PERIPHERAL );
+				break;
+				case DMA2 : 
+				RCC_AHB1_peripheral_Reset_clock(DMA2_AHB_PERIPHERAL );
+				break;
+				case SRAM : 
+				RCC_AHB1_peripheral_Reset_clock(SRAM_AHB_PERIPHERAL );
+				break;
+				case FLITF: 
+				RCC_AHB1_peripheral_Reset_clock(FLITF_AHB_PERIPHERAL);
+				break;  
+				case FSMC : 
+				RCC_AHB1_peripheral_Reset_clock(FSMC_AHB_PERIPHERAL );
+				break;
+			}                                            
+		break;
+		case  PORT_PIN_MODE_PWM:
+			switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+			{	
+				case TIM1 : 
+				RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
+				break; 
+				case TIM2 : 
+				RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
+				break;
+				case TIM3 : 
+				RCC_APB1_peripheral_Reset_clock(TIM3_APB1_PERIPHERAL);
+				break;
+				case TIM4 : 
+				RCC_APB1_peripheral_Reset_clock(TIM4_APB1_PERIPHERAL);
+				break;
+				case TIM5 : 
+				RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
+				break;
+				case TIM6 : 
+				RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
+				break;
+				case TIM7 : 
+				RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
+				break;
+				case TIM8 : 
+				RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
+				break;
+				case TIM9 : 
+				RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
+				break;
+				case TIM10: 
+				RCC_APB2_peripheral_Reset_clock(TIM10_APB2_PERIPHERAL);
+				break;
+				case TIM11: 
+				RCC_APB2_peripheral_Reset_clock(TIM11_APB2_PERIPHERAL);
+				break;
+				case TIM12: 
+				RCC_APB1_peripheral_Reset_clock(TIM12_APB1_PERIPHERAL);
+				break;
+				case TIM13: 
+				RCC_APB1_peripheral_Reset_clock(TIM13_APB1_PERIPHERAL);
+				break;
+				case TIM14: 
+				RCC_APB1_peripheral_Reset_clock(TIM14_APB1_PERIPHERAL);
+				break;	
+			}	
+		break;
+		case  PORT_PIN_MODE_SPI:
+			if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI1)
+			{
+				RCC_APB2_peripheral_Set_clock(SPI1_APB2_PERIPHERAL);
+			}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI2)
+			{
+				RCC_APB1_peripheral_Set_clock(SPI2_APB1_PERIPHERAL); 
+			}
+			else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI3)
+			{
+				RCC_APB1_peripheral_Set_clock(SPI3_APB1_PERIPHERAL);
+			}
+		break;
+		case  PORT_PIN_MODE_I2C:
+			if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == I2C1)
+			{
+				RCC_APB1_peripheral_Set_clock(I2C1_APB2_PERIPHERAL);
+			}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == I2C2)
+			{
+				RCC_APB1_peripheral_Set_clock(I2C2_APB1_PERIPHERAL); 
+			}
+		break;
+		case  PORT_PIN_MODE_USART:
+			switch
+			{
+				case USART1:
+				RCC_APB2_peripheral_Set_clock(USART1_APB2_PERIPHERAL);
+				break;
+				case USART2:
+				RCC_APB1_peripheral_Set_clock(USART2_APB1_PERIPHERAL);
+				break;
+				case USART3:
+				RCC_APB1_peripheral_Set_clock(USART3_APB1_PERIPHERAL);
+				break;
+				case USART4:
+				RCC_APB1_peripheral_Set_clock(USART4_APB1_PERIPHERAL);
+				break;
+				case USART5: 
+				RCC_APB1_peripheral_Set_clock(USART5_APB1_PERIPHERAL);
+				break;
+			}
+		break;	
+		case PORT_PIN_MODE_DAC:
+			RCC_APB1_peripheral_Set_clock(DAC_APB1_PERIPHERAL);
+		break;
+	}
 }
