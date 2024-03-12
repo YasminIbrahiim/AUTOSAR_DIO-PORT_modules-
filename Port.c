@@ -6,6 +6,8 @@
 /*******************************************************************************************************/
 #include "Port.h"
 #include "Port_Regs.h"
+#include "RCC.h"
+#include "AFIO.h"
 
 #if (DioDevErrorDetect == STD_ON) 
 #include "Det.h"
@@ -21,16 +23,16 @@
 
 Port_ConfigType  PortConfigPtr = NULL_Ptr;
 
-#define PORT_MASK_ID   0x00000010
-#define PIN_MASK_ID    0x00000001
+#define PORT_MASK_ID   0x000000F0
+#define PIN_MASK_ID    0x0000000F
 
-#define PORTA          0x00000010
-#define PORTB          0x00000020
-#define PORTC          0x00000030
-#define PORTD          0x00000040
-#define PORTE          0x00000050
-#define PORTF          0x00000060
-#define PORTG          0x00000070
+#define PORTA          0x00000000
+#define PORTB          0x00000010
+#define PORTC          0x00000020
+#define PORTD          0x00000030
+#define PORTE          0x00000040
+#define PORTF          0x00000050
+#define PORTG          0x00000060
 
 /*
 @Service Name       : Port_Init
@@ -50,7 +52,7 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;   
 	for(uint8 u8Counter = 0 ;u8Counter < PortNumberOfPortPins ; u8Counter++ )
 	{
-		PortTypeLOC = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID ;
+		PortTypeLOC = (PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID) >> 4 ;
 		PinTypeLOC  = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PIN_MASK_ID  ;
 		switch(PortTypeLOC)
 		{
@@ -115,13 +117,13 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 			case  PORT_PIN_MODE_ADC: 
 			/* enable ADC clock */
 			/* AFIO pin mapping */
-				if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC1)
+				if((PortConfigPtr->Port_PinAFIOPeriph) == ADC1)
 				{
 					RCC_APB2_peripheral_Set_clock(ADC1_APB2_PERIPHERAL);
-				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC2)
+				}else if((PortConfigPtr->Port_PinAFIOPeriph) == ADC2)
 				{
 					RCC_APB2_peripheral_Set_clock(ADC2_APB2_PERIPHERAL); 
-				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC3)
+				}else if((PortConfigPtr->Port_PinAFIOPeriph) == ADC3)
 				{
 					RCC_APB2_peripheral_Set_clock(ADC3_APB2_PERIPHERAL);
 				}
@@ -134,11 +136,8 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 			break;
 			// Set general purpose timer clock */
 			case PORT_PIN_MODE_DIO_GPT: 
-				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
-				{	
-					case TIM1 : 
-					RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
-					break; 
+				switch(PortConfigPtr->Port_PinAFIOPeriph)
+				{	 
 					case TIM2 : 
 					RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
 					break;
@@ -150,15 +149,6 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 					break;
 					case TIM5 :
 					RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
-					break;
-					case TIM6 : 
-					RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
-					break;
-					case TIM7 : 
-					RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
-					break;
-					case TIM8 : 
-					RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
 					break;
 					case TIM9 : 
 					RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
@@ -184,7 +174,7 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 				RCC_APB1_peripheral_Reset_clock(WWDG_APB1_PERIPHERAL);
 			break;
 			case  PORT_PIN_MODE_ICU: 
-				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				switch(PortConfigPtr->Port_PinAFIOPeriph)
 				{	
 					case TIM1 : 
 					RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
@@ -231,27 +221,14 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 				}
 			break;	
 			case  PORT_PIN_MODE_MEM: 
-				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				 
+				if(PortConfigPtr->Port_PinAFIOPeriph == FSMC) 
 				{
-					case DMA1 : 
-					RCC_AHB1_peripheral_Reset_clock(DMA1_AHB_PERIPHERAL );
-					break;
-					case DMA2 : 
-					RCC_AHB1_peripheral_Reset_clock(DMA2_AHB_PERIPHERAL );
-					break;
-					case SRAM : 
-					RCC_AHB1_peripheral_Reset_clock(SRAM_AHB_PERIPHERAL );
-					break;
-					case FLITF: 
-					RCC_AHB1_peripheral_Reset_clock(FLITF_AHB_PERIPHERAL);
-					break;  
-					case FSMC : 
 					RCC_AHB1_peripheral_Reset_clock(FSMC_AHB_PERIPHERAL );
-					break;
-				}                                            
+				}                                        
 			break;
 			case  PORT_PIN_MODE_PWM:
-				switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
+				switch(PortConfigPtr->Port_PinAFIOPeriph)
 				{	
 					case TIM1 : 
 					RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
@@ -298,23 +275,23 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 				}	
 			break;
 			case  PORT_PIN_MODE_SPI:
-				if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI1)
+				if((PortConfigPtr->Port_PinAFIOPeriph) == SPI1)
 				{
 					RCC_APB2_peripheral_Set_clock(SPI1_APB2_PERIPHERAL);
-				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI2)
+				}else if((PortConfigPtr->Port_PinAFIOPeriph) == SPI2)
 				{
 					RCC_APB1_peripheral_Set_clock(SPI2_APB1_PERIPHERAL); 
 				}
-				else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == SPI3)
+				else if((PortConfigPtr->Port_PinAFIOPeriph) == SPI3)
 				{
 					RCC_APB1_peripheral_Set_clock(SPI3_APB1_PERIPHERAL);
 				}
 			break;
 			case  PORT_PIN_MODE_I2C:
-				if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == I2C1)
+				if((PortConfigPtr->Port_PinAFIOPeriph) == I2C1)
 				{
 					RCC_APB1_peripheral_Set_clock(I2C1_APB2_PERIPHERAL);
-				}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == I2C2)
+				}else if((PortConfigPtr->Port_PinAFIOPeriph) == I2C2)
 				{
 					RCC_APB1_peripheral_Set_clock(I2C2_APB1_PERIPHERAL); 
 				}
@@ -342,6 +319,18 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 			case PORT_PIN_MODE_DAC:
 				RCC_APB1_peripheral_Set_clock(DAC_APB1_PERIPHERAL);
 			break;
+			case PORT_PIN_MODE_SDIO:
+				RCC_AHB_peripheral_Set_clock(SDIO_AHB_PERIPHERAL);
+			break
+			case PORT_PIN_MODE_USB:
+				RCC_APB1_peripheral_Set_clock(USB_APB1_PERIPHERAL);
+			break;
+			case PORT_PIN_MODE_EXTI:
+			AFIO_EXTI_PinMapping(PinTypeLOC, PortTypeLOC);
+			break;
+			case PORT_PIN_MODE_EVENTOUT:
+			AFIO_Eventout_PinMapping(PinTypeLOC, PortTypeLOC);
+			break;
 		}
 		
 	}
@@ -360,7 +349,7 @@ void Port_Init (const Port_ConfigType* ConfigPtr)
 @Description        : Sets the port pin direction                */
 void Port_SetPinDirection (Port_PinType Pin, Port_PinDirectionType Direction)
 {
-	PortTypeLOC = Pin & PORT_MASK_ID ;
+	PortTypeLOC = (Pin & PORT_MASK_ID) >> 4;
 	PinTypeLOC  = Pin & PIN_MASK_ID  ;
 	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
 	switch(PortTypeLOC)
@@ -435,7 +424,7 @@ void Port_RefreshPortDirection (void)
 	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
 	for(uint8 u8Counter = 0 ;u8Counter < PortNumberOfPortPins ; u8Counter++ )
 	{
-		PortTypeLOC = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID ;
+		PortTypeLOC = (PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PORT_MASK_ID) >> 4 ;
 		PinTypeLOC  = PortConfigPtr->arrPort_PinConfig[u8Counter].PortPinId & PIN_MASK_ID  ;
 		switch(PortTypeLOC)
 		{
@@ -525,7 +514,7 @@ void Port_GetVersionInfo (Std_VersionInfoType* versioninfo)
 @Description        : Sets the port pin mode                          */
 void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 {
-	PortTypeLOC = Pin & PORT_MASK_ID ;
+	PortTypeLOC = (Pin & PORT_MASK_ID ) >> 4;
 	PinTypeLOC  = Pin & PIN_MASK_ID  ;
 	GPIOx_REG*  GPIO_BaseAddress = NULL_Ptr;
 	/* enable GPIO driver clock */
@@ -573,6 +562,7 @@ void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 			if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC1)
 			{
 				RCC_APB2_peripheral_Set_clock(ADC1_APB2_PERIPHERAL);
+				
 			}else if((PortConfigPtr->Port_PinAFIOPeriphChangeable) == ADC2)
 			{
 				RCC_APB2_peripheral_Set_clock(ADC2_APB2_PERIPHERAL); 
@@ -590,10 +580,7 @@ void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 		// Set general purpose timer clock */
 		case PORT_PIN_MODE_DIO_GPT: 
 			switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
-			{	
-				case TIM1 : 
-				RCC_APB2_peripheral_Reset_clock(TIM1_APB2_PERIPHERAL);
-				break; 
+			{	 
 				case TIM2 : 
 				RCC_APB1_peripheral_Reset_clock(TIM2_APB1_PERIPHERAL);
 				break;
@@ -605,15 +592,6 @@ void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 				break;
 				case TIM5 :
 				RCC_APB1_peripheral_Reset_clock(TIM5_APB1_PERIPHERAL);
-				break;
-				case TIM6 : 
-				RCC_APB1_peripheral_Reset_clock(TIM6_APB1_PERIPHERAL);
-				break;
-				case TIM7 : 
-				RCC_APB1_peripheral_Reset_clock(TIM7_APB1_PERIPHERAL);
-				break;
-				case TIM8 : 
-				RCC_APB2_peripheral_Reset_clock(TIM8_APB2_PERIPHERAL);
 				break;
 				case TIM9 : 
 				RCC_APB2_peripheral_Reset_clock(TIM9_APB2_PERIPHERAL);
@@ -686,23 +664,9 @@ void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 			}
 		break;	
 		case  PORT_PIN_MODE_MEM: 
-			switch(PortConfigPtr->Port_PinAFIOPeriphChangeable)
-			{
-				case DMA1 : 
-				RCC_AHB1_peripheral_Reset_clock(DMA1_AHB_PERIPHERAL );
-				break;
-				case DMA2 : 
-				RCC_AHB1_peripheral_Reset_clock(DMA2_AHB_PERIPHERAL );
-				break;
-				case SRAM : 
-				RCC_AHB1_peripheral_Reset_clock(SRAM_AHB_PERIPHERAL );
-				break;
-				case FLITF: 
-				RCC_AHB1_peripheral_Reset_clock(FLITF_AHB_PERIPHERAL);
-				break;  
-				case FSMC : 
+			if(PortConfigPtr->Port_PinAFIOPeriphChangeable == FSMC )
+			{  
 				RCC_AHB1_peripheral_Reset_clock(FSMC_AHB_PERIPHERAL );
-				break;
 			}                                            
 		break;
 		case  PORT_PIN_MODE_PWM:
@@ -796,6 +760,18 @@ void Port_SetPinMode (Port_PinType Pin, Port_PinModeType Mode)
 		break;	
 		case PORT_PIN_MODE_DAC:
 			RCC_APB1_peripheral_Set_clock(DAC_APB1_PERIPHERAL);
+		break;
+		case PORT_PIN_MODE_SDIO:
+			RCC_AHB_peripheral_Set_clock(SDIO_AHB_PERIPHERAL);
+		break
+		case PORT_PIN_MODE_USB:
+			RCC_APB1_peripheral_Set_clock(USB_APB1_PERIPHERAL);
+		break;
+		case PORT_PIN_MODE_EXTI:
+			AFIO_EXTI_PinMapping(PinTypeLOC, PortTypeLOC);
+		break;
+		case PORT_PIN_MODE_EVENTOUT:
+			AFIO_Eventout_PinMapping(PinTypeLOC, PortTypeLOC);
 		break;
 	}
 }
